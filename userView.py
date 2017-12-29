@@ -78,7 +78,7 @@ def doLogin(json_data):
         
     else:
         print("username was wrong")
-        return {"Status": 2,"data": {"message":"Invalid username or password"}}
+        return {"Status": "2","data": {"message":"Invalid username or password"}}
     
     print ("We dropped out the bottom for some reason")
     
