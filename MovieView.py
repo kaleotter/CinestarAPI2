@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, json
 from flask_restful import abort
 from sqlalchemy import create_engine, exists, func
 from sqlalchemy.orm import sessionmaker
@@ -6,6 +6,7 @@ from json import dumps
 from webargs import fields, validate
 from webargs.flaskparser import use_kwargs, parser
 from flask_jsonpify import jsonify
+import urllib3
 
 import db
 
@@ -41,4 +42,19 @@ def movSearch(queryArgs):
         
         return({"status":'0'})
 
+ 
     
+
+def newMov(queryArgs):
+   
+       apiKey= '36d82221'
+       MovUrl = 'http://www.omdbapi.com/'
+       http = urllib3.PoolManager()
+       r= http.request(
+           'GET', 
+           MovUrl,
+           fields = {'apikey':apiKey, 't':queryArgs['m'],'r': 'json','callback': 'minkey steve'})
+       response = json.loads(r.data.decode('utf-8'))['args']
+       {'arg':'value'}
+       print (response)
+       return ('we did it')

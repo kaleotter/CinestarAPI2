@@ -58,20 +58,20 @@ class Movies(Resource):
 
 #arguments for the movie search
 mov_search_args = {
-        'movie_name': fields.String(required=True, location = 'query'),         #we always need a movie name
-        'actor_name': fields.String(required=False, missing='', location ='query'),                #optionally we need an actor name
-        'order_by': fields.Integer(required=False, missing=0, location = 'query'),
-        'sort':     fields.String (required=True, missing ='ascending', location = 'query')        #we need to know how the user wants the data sorted
+        'm': fields.String(required=True, location = 'query'),         #we always need a movie name
+        'a': fields.String(required=False, missing='', location ='query'),                #optionally we need an actor name
+        'order': fields.Integer(required=False, missing=0, location = 'query'),
+        'sort':     fields.String (required=False, missing ='ascending', location = 'query')        #we need to know how the user wants the data sorted
         }
 
 class MovieSearch (Resource):
         
         @use_kwargs(mov_search_args)
-        def get (self, movie_name, actor_name, order_by, sort):
+        def get (self, m, a, order, sort):
 
             result = 'if you see this then something went wrong'
             
-            search_result = MovieView.movSearch({"movie":movie_name, "actor":actor_name, "orderBy": order_by, "sort": sort})
+            search_result = MovieView.movSearch({"movie":m, "actor":a, "orderBy": order, "sort": sort})
             status_code = search_result['status']
             print (status_code)
 
@@ -81,7 +81,15 @@ class MovieSearch (Resource):
                 result = ({"Message":"no results found for %s" %(movie_name)})
                 returncode = 404
             
-            return result, returncode  
+            return result, returncode
+
+        @use_kwargs(mov_search_args)
+        def post (self, m, a, order, sort):
+            
+
+            MovieView.newMov({'m': m})
+
+            return ('not done yet')
     
 class MovieId (Resource):
     def get (self,id):
