@@ -37,7 +37,7 @@ class Movies(Resource):
 #        return {'movieID':[i[0] for i in query.cursor.fetchall()]}
     
     
-class MovieSearchTest (Resource):
+class MovieSearch (Resource):
     args = {
         'id': fields.Int(
             required =True,
@@ -94,19 +94,22 @@ class Login (Resource):
         json_data = request.get_json(force=True)
         
         response_data = userView.doLogin(json_data)
+        status = response_data["Status"]
         
-        if response_data == {"message":"Invalid username or password"}:
+        if status == 2:
             print ("we got to an invalid user/pass")
 
-            return (response_data), 403 
+            
+
+            return response_data['data'], 403
         else:
             print ("we got to a valid user/pass")
-            return (response_data)
+            return jsonify(response_data['data'])
 
 #AAAAAAAH I COMMENTED THIS OUT.     
 api.add_resource(Movies, '/Movies')
 api.add_resource(MovieId, '/Movies/<movie_ID>')
-api.add_resource(MovieSearchTest, '/test', endpoint='test')
+api.add_resource(MovieSearch, '/movies/search', endpoint='search')
 api.add_resource(Users, '/users')
 api.add_resource(Login, '/users/login')
     

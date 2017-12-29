@@ -16,7 +16,7 @@ import bcrypt
 import db
 
 #engine = create_engine('mysql://dbadmin:student@cr.cinestar-internal.lan/Cinestar', echo =True)
-engine = create_engine('mysql://root:student@localhost/cinestar', echo = True)
+engine = create_engine('mysql://root:student@localhost/cinestar')
 
 Session = sessionmaker(bind=engine)
 
@@ -63,22 +63,22 @@ def doLogin(json_data):
         
         print ("User Found")
         #We know the user Exists, so now we can check thier password
-        for userID, password, salt, in session.query(db.Users).\
-                              filter([db.Users.username]== user_name): 
+        for instance in session.query(db.Users).\
+                              filter_by(username = user_name): 
 
-            if bcrypt.checkpw(password_raw,password):
+            if bcrypt.checkpw(password_raw.encode('utf8'),instance.password):
                 #password is correct so we can return a user id.
-                print ("we won") 
-                return {"UserID":userID}
+                
+                return {"Status": 1, "data":{"UserID":instance.userID}}
                 
 
             else: 
                 print ("pwd was wrong")
-                return {"message":"Invalid username or password"}
+                return {"Status": 2, "data": {"message":"Invalid username or password"}}
         
     else:
         print("username was wrong")
-        return {"message":"Invalid username or password"}
+        return {"Status": 2,"data": {"message":"Invalid username or password"}}
     
     print ("We dropped out the bottom for some reason")
     
