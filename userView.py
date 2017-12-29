@@ -15,7 +15,9 @@ import bcrypt
 #Local Modules
 import db
 
-engine = create_engine('mysql://dbadmin:student@cr.cinestar-internal.lan/Cinestar', echo =True)
+#engine = create_engine('mysql://dbadmin:student@cr.cinestar-internal.lan/Cinestar', echo =True)
+engine = create_engine('mysql://root:student@localhost/cinestar', echo = True)
+
 Session = sessionmaker(bind=engine)
 
 def createNewUser(jsondata):
@@ -37,30 +39,40 @@ def createNewUser(jsondata):
     #we can then prepare to create the account
         
     #first hash the password using bcrypt
-    hashed = bcrypt.hashpw(pw.encode('utf8'),bcrypt.gensalt())
+    pw_salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(pw.encode('utf8'),pw_salt)
 
-    new_user = db.Users(username = user, email = email, password = hashed)
+    new_user = db.Users(username = user, email = email, password = hashed, salt = pw_salt)
     session.add(new_user)
     session.commit()
         
     return jsonify({"Message":"Account created successfully! You Can now Log in"})
 
 
-def doLogin(userName):
+def doLogin(json_data):
     session = Session()
     
-    
+    user_name=json_data["username"]
+    password_raw=json_data["password"]
     
     
     #First Work out if the user exists
-    if (session.query(exists().where(db.Users.username== userName)).scalar()):
+    if (session.query(exists().where(db.Users.username== user_name)).scalar()):
         
         #We know the user Exists, so now we can check thier password
-        for userID in session.query.filter(db.Users.username == userName): #wrong. fix in morning
-            print (userID)
+        for userID, password, salt, in session.query(db.Users).\
+                              filter(db.Users.username== user_name): 
+
+            if bcrypt.checkpw(password_raw,password):
+                #password is correct so we can return a user id. 
+                return '{"UserID":%s}' %(userID)
+
+            else: 
+                return '{\"message\":\"Invalid username or password\"}'
+        
     else:
         
-        print ('failed to find user')
+        return '{\"message\":\"Invalid username or password\"}'
     
     
     return jsonify({"Message":"I keel you"})

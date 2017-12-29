@@ -2,7 +2,8 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.types import DateTime, Float
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine('mysql://accessusr:Student@192.168.0.64/CineStarMain', echo = True)
+#engine = create_engine('mysql://accessusr:Student@192.168.0.64/CineStarMain', echo = True)
+engine = create_engine('mysql://root:student@localhost/cinestar', echo = True)
 
 Base = declarative_base()
 
@@ -13,14 +14,16 @@ class Users(Base):
     username = Column(String)
     email = Column(String)
     password = Column(String)
+    salt = Column(String)
     
     
     def __repr__(self):
-        return "<Users( userID = '%s',username='%s', email='%s', password='%s')>" % (
+        return "<Users( userID = '%s',username='%s', email='%s', password='%s', salt=%s)>" % (
                         self.userID,
                         self.username, 
                         self.email, 
-                        self.password)
+                        self.password,
+                        self.salt)
     
 
 

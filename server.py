@@ -3,6 +3,7 @@
 # and open the template in the editor.
 
 from flask import Flask, request
+from requests import put, get
 from flask_restful import Resource, Api, abort, fields, marshal_with, reqparse
 from sqlalchemy import create_engine, exists
 from sqlalchemy.orm import sessionmaker
@@ -19,7 +20,10 @@ import userView
 
 app = Flask(__name__)
 api = Api(app)
-engine = create_engine('mysql://dbadmin:student@cr.cinestar-internal.lan/Cinestar', echo =True)
+
+#engine = create_engine('mysql://dbadmin:student@cr.cinestar-internal.lan/Cinestar', echo =True)
+engine = create_engine('mysql://root:student@localhost/cinestar', echo = True)
+
 Session = sessionmaker(bind=engine)
 
 class Movies(Resource):
@@ -85,18 +89,23 @@ class Users (Resource):
 
             
 class Login (Resource):
-    def get (self,username):
-        
-        userView.doLogin(username)
-        return jsonify ({"message":"Complete this plz"})
+    def post (self):
 
+        json_data = request.get_json(force=True)
+        
+        response_data = userView.doLogin(json_data)
+        
+        if response_data == '{\"message\":\"Invalid username or password\"}':
+            return jsonify(response_data),403 
+        else: 
+            return jsonify(response_data)
 
 #AAAAAAAH I COMMENTED THIS OUT.     
 api.add_resource(Movies, '/Movies')
 api.add_resource(MovieId, '/Movies/<movie_ID>')
 api.add_resource(MovieSearchTest, '/test', endpoint='test')
 api.add_resource(Users, '/users')
-api.add_resource(Login, '/users/login/<username>')
+api.add_resource(Login, '/users/login')
     
 if __name__ == '__main__':
     app.run(port=5002, host='0.0.0.0')
