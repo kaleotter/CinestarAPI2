@@ -53,27 +53,34 @@ def doLogin(json_data):
     session = Session()
     
     user_name=json_data["username"]
+    print (user_name)
     password_raw=json_data["password"]
+    print (password_raw)
     
     
     #First Work out if the user exists
-    if (session.query(exists().where(db.Users.username== user_name)).scalar()):
+    if (session.query(exists().where(db.Users.username == user_name)).scalar()):
         
+        print ("User Found")
         #We know the user Exists, so now we can check thier password
         for userID, password, salt, in session.query(db.Users).\
-                              filter(db.Users.username== user_name): 
+                              filter([db.Users.username]== user_name): 
 
             if bcrypt.checkpw(password_raw,password):
-                #password is correct so we can return a user id. 
-                return '{"UserID":%s}' %(userID)
+                #password is correct so we can return a user id.
+                print ("we won") 
+                return {"UserID":userID}
+                
 
             else: 
-                return '{\"message\":\"Invalid username or password\"}'
+                print ("pwd was wrong")
+                return {"message":"Invalid username or password"}
         
     else:
-        
-        return '{\"message\":\"Invalid username or password\"}'
+        print("username was wrong")
+        return {"message":"Invalid username or password"}
+    
+    print ("We dropped out the bottom for some reason")
     
     
-    return jsonify({"Message":"I keel you"})
     

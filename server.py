@@ -95,10 +95,13 @@ class Login (Resource):
         
         response_data = userView.doLogin(json_data)
         
-        if response_data == '{\"message\":\"Invalid username or password\"}':
-            return jsonify(response_data),403 
-        else: 
-            return jsonify(response_data)
+        if response_data == {"message":"Invalid username or password"}:
+            print ("we got to an invalid user/pass")
+
+            return (response_data), 403 
+        else:
+            print ("we got to a valid user/pass")
+            return (response_data)
 
 #AAAAAAAH I COMMENTED THIS OUT.     
 api.add_resource(Movies, '/Movies')
