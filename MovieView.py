@@ -53,8 +53,7 @@ def newMov(queryArgs):
        r= http.request(
            'GET', 
            MovUrl,
-           fields = {'apikey':apiKey, 't':queryArgs['m'],'r': 'json','callback': 'minkey steve'})
-       response = json.loads(r.data.decode('utf-8'))['args']
-       {'arg':'value'}
-       print (response)
-       return ('we did it')
+           fields = {'apikey':apiKey, 't':queryArgs['m'],'r': 'json'})
+       returned_data = json.loads(r.data.decode('utf-8'))
+       print (returned_data)
+       return ("deed eet")

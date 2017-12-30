@@ -37,37 +37,20 @@ class Movies(Resource):
         return jsonify(result)
 #        return {'movieID':[i[0] for i in query.cursor.fetchall()]}
     
-    
-#class MovieSearch (Resource):
-#    args = {
-#        'id': fields.Int(
-#            required =True,
-#            ),
-#        }
+   
 
-#    @use_kwargs(args)
-    
-#    def get (self, id):
-#        conn = utils.DbConn.conn().connect()
-#        query = conn.execute("SELECT * FROM Movies WHERE MovID=%d" %int(id))
-#        result = {'data': [dict(zip(tuple (query.keys()),i)) for i in query.cursor]}
-#        # dict() builds an key data referenced array? Sorta like a pk in a database? See https://docs.python.org/2/tutorial/datastructures.html 5.5)
-#        # zip() not quite sure I understand this. Ask Typh for help? https://docs.python.org/3.3/library/functions.html#zip
-#        # tuple() like a list but non dynamic. Can't add or remove without rebuilding it from scratch? http://www.tutorialspoint.com/python/tuple_tuple.htm
-#        return jsonify(result)
 
-#arguments for the movie search
-mov_search_args = {
+
+class MovieSearch (Resource):
+#parameters for the movie search
+    mov_search_args = {
         'm': fields.String(required=True, location = 'query'),         #we always need a movie name
         'a': fields.String(required=False, missing='', location ='query'),                #optionally we need an actor name
         'order': fields.Integer(required=False, missing=0, location = 'query'),
         'sort':     fields.String (required=False, missing ='ascending', location = 'query')        #we need to know how the user wants the data sorted
-        }
-
-class MovieSearch (Resource):
-        
-        @use_kwargs(mov_search_args)
-        def get (self, m, a, order, sort):
+        }        
+    @use_kwargs(mov_search_args)
+    def get (self, m, a, order, sort):
 
             result = 'if you see this then something went wrong'
             
@@ -78,13 +61,13 @@ class MovieSearch (Resource):
             if status_code == '0':  #nothing found. abort and give a 404. Client should then proceed to make a get request. 
                 print ('nothing found')
 
-                result = ({"Message":"no results found for %s" %(movie_name)})
+                result = ({"Message":"no results found for %s" %(m)})
                 returncode = 404
             
             return result, returncode
 
-        @use_kwargs(mov_search_args)
-        def post (self, m, a, order, sort):
+    @use_kwargs(mov_search_args)
+    def post (self, m, a, order, sort):
             
 
             MovieView.newMov({'m': m})
@@ -116,6 +99,7 @@ app = Flask(__name__)
 api = Api(app)
 
 class Users (Resource):
+
     def post(self):                #create an acccount
     
         json_data = request.get_json(force=True)
@@ -123,6 +107,23 @@ class Users (Resource):
         
         return(output)
 
+class Profile (Resource):
+    #args = { 'u': fields.String(required=True)}
+
+    #@use_kwargs(args)
+    def get (self,usr_ID):
+        
+        #get user data
+        data = userView.getUser(usr_ID)
+        returndata = {"Message":"something went terribly wrong and may be beyond our control. You are probably a teacup"}
+        returncode = 418        #I'm a little teapot short and stout
+
+        #if no user found
+        if data['status'] == '1':
+            returndata= {"message":"No user profile found with that ID"}
+            retuencode =404
+
+        return returndata, returncode 
             
 class Login (Resource):
     def post (self):
@@ -147,6 +148,7 @@ api.add_resource(Movies, '/Movies')
 api.add_resource(MovieId, '/Movies/<movie_ID>')
 api.add_resource(MovieSearch, '/movies/search', endpoint='search')
 api.add_resource(Users, '/users')
+api.add_resource(Profile, '/users/<int:usr_ID>')
 api.add_resource(Login, '/users/login')
     
 if __name__ == '__main__':

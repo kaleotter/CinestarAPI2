@@ -4,11 +4,12 @@
 
 #Imports
 from flask import Flask
-from sqlalchemy import create_engine, exists
+from sqlalchemy import create_engine, exists, func, alias
 from sqlalchemy.orm import sessionmaker
 from json import dumps
 from webargs import fields, validate
 from webargs.flaskparser import use_kwargs, parser
+from json import *
 from flask_jsonpify import jsonify
 import bcrypt
 
@@ -16,7 +17,7 @@ import bcrypt
 import db
 
 #engine = create_engine('mysql://dbadmin:student@cr.cinestar-internal.lan/Cinestar', echo =True)
-engine = create_engine('mysql://root:student@localhost/cinestar')
+engine = create_engine('mysql://root:student@localhost/cinestar', echo=False)
 
 Session = sessionmaker(bind=engine)
 
@@ -56,6 +57,7 @@ def doLogin(json_data):
     print (user_name)
     password_raw=json_data["password"]
     print (password_raw)
+    returndata={"status":"999", "data":"nothing"}
     
     
     #First Work out if the user exists
@@ -69,18 +71,37 @@ def doLogin(json_data):
             if bcrypt.checkpw(password_raw.encode('utf8'),instance.password):
                 #password is correct so we can return a user id.
                 
-                return {"Status": 1, "data":{"UserID":instance.userID}}
+                returndata= {"Status": 1, "data":{"UserID":instance.userID}}
                 
 
             else: 
                 print ("pwd was wrong")
-                return {"Status": 2, "data": {"message":"Invalid username or password"}}
+                returndata= {"Status": 2, "data": {"message":"Invalid username or password"}}
         
     else:
         print("username was wrong")
-        return {"Status": "2","data": {"message":"Invalid username or password"}}
+        returndata= {"Status": "2","data": {"message":"Invalid username or password"}}
     
-    print ("We dropped out the bottom for some reason")
+    return returndata
+
+def getUser (u):
+
+    session = Session()
+    returndata = {}
+    if session.query(exists().where(db.Users.userID==u)).scalar():
+
+        print ("we found a user")
+
+        for q in session.query(db.Users).filter(db.Users.userID==u).all():
+            print (q.__dict__)
+            
+        returndata={"status": '0', "Data": "some data here mate"}
+
+    else:
+            
+        returndata = {"status":"1", "Data":''}
+
+    return (returndata)
     
     
     
